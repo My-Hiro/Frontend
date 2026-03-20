@@ -1,266 +1,156 @@
-import { Eye, EyeOff, ShieldCheck } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { adminAuthApi, type AdminAuthSession } from "../../state/api";
+"use client";
 
-type Mode = "signin" | "forgot" | "reset";
+import { Eye, EyeOff, ShieldCheck, Lock, Mail, Loader2, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { adminAuthApi } from "../../lib/api/auth";
+import type { AdminAuthSession } from "../../lib/api/session";
+import { cn } from "../../lib/utils";
 
-type Props = {
+type Mode = "signin" | "forgot";
+
+interface AuthGateProps {
   onAuthenticated: (session: AdminAuthSession) => void;
-};
+}
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^\+?[1-9]\d{7,14}$/;
-
-const normalizePhone = (value: string): string => value.replace(/[\s()-]/g, "");
-
-const isValidIdentifier = (value: string): boolean => {
-  const trimmed = value.trim();
-  if (!trimmed) return false;
-  if (EMAIL_PATTERN.test(trimmed)) return true;
-  return PHONE_PATTERN.test(normalizePhone(trimmed));
-};
-
-const modePath: Record<Mode, string> = {
-  signin: "/auth/sign-in",
-  forgot: "/auth/forgot-password",
-  reset: "/auth/reset-password"
-};
-
-const pathMode = (pathname: string): Mode => {
-  const normalized = pathname.toLowerCase().replace(/\/+$/, "");
-  const match = (Object.entries(modePath) as Array<[Mode, string]>).find(
-    ([, path]) => path === normalized
-  );
-  return match?.[0] ?? "signin";
-};
-
-export function AuthGate({ onAuthenticated }: Props) {
-  const [mode, setMode] = useState<Mode>(() => {
-    if (typeof window === "undefined") return "signin";
-    return pathMode(window.location.pathname);
-  });
-
+export function AuthGate({ onAuthenticated }: AuthGateProps) {
+  const [mode, setMode] = useState<Mode>("signin");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [challengeId, setChallengeId] = useState<string | null>(null);
-  const [code, setCode] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [token, setToken] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [status, setStatus] = useState("");
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const nextPath = modePath[mode];
-    if (window.location.pathname !== nextPath) {
-      window.history.replaceState(null, "", nextPath);
-    }
-  }, [mode]);
-
-  const canSignIn = useMemo(
-    () => isValidIdentifier(identifier) && password.length >= 8,
-    [identifier, password]
-  );
-
-  const run = async (fn: () => Promise<void>) => {
-    setBusy(true);
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     setError("");
-    setStatus("");
     try {
-      await fn();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Request failed.");
+      const session = await adminAuthApi.signInWithPassword({ identifier, password });
+      onAuthenticated(session);
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials. Please try again.");
     } finally {
-      setBusy(false);
+      setLoading(false);
     }
-  };
-
-  const assertAdmin = (session: AdminAuthSession) => {
-    if (session.user.role !== "admin") {
-      throw new Error("This account is not authorized for Admin access.");
-    }
-    onAuthenticated(session);
   };
 
   return (
-    <div className="auth-shell">
-      <div className="auth-frame auth-frame-single">
-        <div className="auth-card auth-card-zip">
-          <div className="auth-card-hero">
-            <div className="auth-card-hero-icon">
-              <ShieldCheck size={24} />
-            </div>
+    <div className="min-h-screen w-full flex items-center justify-center bg-muted/30 p-4">
+      <div className="w-full max-w-[400px] space-y-8">
+        <div className="flex flex-col items-center text-center space-y-2">
+          <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-2">
+            <ShieldCheck size={28} className="text-white" />
           </div>
-          <h1 className="auth-title">myHiro Admin</h1>
-
-          {mode === "signin" && (
-            <>
-              <h2 className="auth-subtitle">Sign in to your account</h2>
-              <p>Use your password to access platform controls.</p>
-
-              <div className="auth-form">
-                <label>
-                  Phone or email
-                  <input
-                    value={identifier}
-                    onChange={(event) => setIdentifier(event.target.value)}
-                    placeholder="+233... or admin@example.com"
-                  />
-                </label>
-                <label>
-                  Password
-                  <div className="auth-password-wrap">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="auth-password-toggle"
-                      onClick={() => setShowPassword((current) => !current)}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                </label>
-                <button
-                  type="button"
-                  disabled={busy || !canSignIn}
-                  onClick={() =>
-                    run(async () => {
-                      const session = await adminAuthApi.signInWithPassword({
-                        identifier: identifier.trim(),
-                        password
-                      });
-                      assertAdmin(session);
-                    })
-                  }
-                >
-                  {busy ? "Please wait..." : "Sign in"}
-                </button>
-              </div>
-              <p className="auth-link-line">
-                Forgot password?{" "}
-                <button type="button" className="link-btn" onClick={() => setMode("forgot")}>
-                  Reset
-                </button>
-              </p>
-            </>
-          )}
-
-          {mode === "forgot" && (
-            <>
-              <h2 className="auth-subtitle">Forgot your password?</h2>
-              <p>Enter your phone or email to request a reset code.</p>
-              <p className="auth-link-line">
-                <button type="button" className="link-btn" onClick={() => setMode("signin")}>
-                  Back to sign in
-                </button>
-              </p>
-              <div className="auth-form">
-                <label>
-                  Phone or email
-                  <input
-                    value={identifier}
-                    onChange={(event) => setIdentifier(event.target.value)}
-                    placeholder="+233... or admin@example.com"
-                  />
-                </label>
-                <button
-                  type="button"
-                  disabled={busy || !identifier.trim()}
-                  onClick={() =>
-                    run(async () => {
-                      const payload = await adminAuthApi.forgotPassword(identifier.trim());
-                      setChallengeId(payload.challengeId);
-                      setMode("reset");
-                      if (payload.challengeId) {
-                        const devHint = payload.devCode ? ` (dev code: ${payload.devCode})` : "";
-                        setStatus(`Reset code sent via ${payload.channel ?? "sms"}${devHint}.`);
-                      } else {
-                        setStatus("Check mail log for reset token.");
-                      }
-                    })
-                  }
-                >
-                  {busy ? "Sending..." : "Continue"}
-                </button>
-              </div>
-            </>
-          )}
-
-          {mode === "reset" && (
-            <>
-              <h2 className="auth-subtitle">Reset password</h2>
-              <p>Enter your reset code and new password.</p>
-              <p className="auth-link-line">
-                <button type="button" className="link-btn" onClick={() => setMode("signin")}>
-                  Back to sign in
-                </button>
-              </p>
-              <div className="auth-form">
-                {challengeId ? (
-                  <label>
-                    OTP code
-                    <input
-                      value={code}
-                      onChange={(event) => setCode(event.target.value)}
-                      maxLength={6}
-                    />
-                  </label>
-                ) : (
-                  <label>
-                    Email reset token
-                    <input value={token} onChange={(event) => setToken(event.target.value)} />
-                  </label>
-                )}
-                <label>
-                  New password
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(event) => setNewPassword(event.target.value)}
-                  />
-                </label>
-                <button
-                  type="button"
-                  disabled={busy || newPassword.length < 8 || (challengeId ? code.length !== 6 : !token.trim())}
-                  onClick={() =>
-                    run(async () => {
-                      if (challengeId) {
-                        await adminAuthApi.resetPasswordWithOtp({
-                          challengeId,
-                          code: code.trim(),
-                          newPassword
-                        });
-                      } else {
-                        await adminAuthApi.resetPasswordWithToken({
-                          token: token.trim(),
-                          newPassword
-                        });
-                      }
-                      setMode("signin");
-                      setChallengeId(null);
-                      setCode("");
-                      setToken("");
-                      setNewPassword("");
-                      setStatus("Password updated. Sign in again.");
-                    })
-                  }
-                >
-                  {busy ? "Updating..." : "Reset password"}
-                </button>
-              </div>
-            </>
-          )}
-
-          {status && <p className="auth-status">{status}</p>}
-          {error && <p className="auth-error">{error}</p>}
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">myHiro Admin</h1>
+          <p className="text-sm text-muted-foreground">Secure oversight & platform management</p>
         </div>
+
+        <div className="bg-card border rounded-2xl shadow-xl p-8 space-y-6">
+          {mode === "signin" ? (
+            <form onSubmit={handleSignIn} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Identity</label>
+                <div className="relative group">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
+                    <Mail size={16} />
+                  </div>
+                  <input 
+                    type="text"
+                    placeholder="Email or phone number"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    required
+                    className="w-full pl-10 pr-4 py-2.5 bg-background border rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-1">
+                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Password</label>
+                  <button 
+                    type="button" 
+                    onClick={() => setMode("forgot")}
+                    className="text-xs font-bold text-primary hover:underline transition-all"
+                  >
+                    Forgot?
+                  </button>
+                </div>
+                <div className="relative group">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
+                    <Lock size={16} />
+                  </div>
+                  <input 
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full pl-10 pr-10 py-2.5 bg-background border rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-xs font-bold text-destructive flex items-center gap-2">
+                  <div className="h-4 w-4 rounded-full bg-destructive flex items-center justify-center shrink-0">
+                    <span className="text-[10px] text-white">!</span>
+                  </div>
+                  {error}
+                </div>
+              )}
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-sm shadow-lg shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group"
+              >
+                {loading ? <Loader2 className="animate-spin" size={18} /> : (
+                  <>
+                    Sign In <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </form>
+          ) : (
+            <div className="space-y-6 py-2">
+              <div className="space-y-2">
+                <h2 className="text-lg font-bold">Reset Password</h2>
+                <p className="text-xs text-muted-foreground leading-relaxed">Enter your registered identifier. We will send recovery instructions to your email or phone.</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Identity</label>
+                <input 
+                  type="text"
+                  placeholder="Email or phone"
+                  className="w-full px-4 py-2.5 bg-background border rounded-xl text-sm font-medium outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-3">
+                <button className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm">
+                  Send Recovery Link
+                </button>
+                <button 
+                  onClick={() => setMode("signin")}
+                  className="w-full py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Return to Sign In
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground font-medium">
+          Protected by myHiro Cloud Guard &bull; &copy; 2026
+        </p>
       </div>
     </div>
   );
