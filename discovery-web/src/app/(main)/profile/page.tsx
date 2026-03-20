@@ -21,7 +21,9 @@ interface Props {
   onSignOut?: () => void;
 }
 
-export function ProfilePage({ onRequestSignIn, onSignOut }: Props) {
+export default function ProfilePage() {
+  const onSignOut = () => {};
+  const onRequestSignIn = () => {};
   const session = discoveryAuthApi.getSession();
   const defaultIdentity =
     session?.user.phone_e164?.trim() ||

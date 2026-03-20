@@ -60,7 +60,7 @@ export function ImageWithFallback(props: ImageWithFallbackProps) {
 
   const debugStyle: React.CSSProperties = (() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const isDev = Boolean((import.meta as any)?.env?.DEV);
+    const isDev = process.env.NODE_ENV === "development";
     if (!isDev || !isFallback) return {};
     if (typeof window === 'undefined') return {};
     const enabled = window.location.search.includes('debugImages=1');

@@ -13,7 +13,9 @@ interface SavedPageProps {
   onProductPress: (productId: string) => void;
 }
 
-export function SavedPage({ onStorePress, onProductPress }: SavedPageProps) {
+export default function SavedPage() {
+  const onStorePress = (id: string) => {};
+  const onProductPress = (id: string) => {};
   const [activeTab, setActiveTab] = useState<"stores" | "products" | "searches">("stores");
   const [savedStores, setSavedStores] = useState<StoreCardModel[]>([]);
   const [savedProducts, setSavedProducts] = useState<ProductCardModel[]>([]);
