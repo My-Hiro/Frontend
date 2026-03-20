@@ -4,7 +4,7 @@ import * as React from "react";
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu";
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 
-import { cn } from "./utils";
+import { cn } from "@/components/ui/utils";
 
 function ContextMenu({
   ...props
@@ -250,3 +250,4 @@ export {
   ContextMenuSubTrigger,
   ContextMenuRadioGroup,
 };
+
