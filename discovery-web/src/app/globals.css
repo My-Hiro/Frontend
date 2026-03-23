@@ -1,5 +1,5 @@
 /*! tailwindcss v4.1.3 | MIT License | https://tailwindcss.com */
-@layer properties-custom-custom {
+@layer properties {
   @supports (((-webkit-hyphens: none)) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color: rgb(from red r g b)))) {
     *, :before, :after, ::backdrop {
       --tw-translate-x: 0;
@@ -57,7 +57,12 @@
   }
 }
 
-@layer theme-custom-custom {
+html,
+body {
+  overflow-x: hidden;
+}
+
+@layer theme {
   :root, :host {
     --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -116,7 +121,7 @@
   }
 }
 
-@layer base-custom-custom {
+@layer base {
   *, :after, :before, ::backdrop {
     box-sizing: border-box;
     border: 0 solid;
@@ -427,7 +432,7 @@
   }
 }
 
-@layer utilities-custom {
+@layer utilities {
   .visible {
     visibility: visible;
   }
@@ -2316,6 +2321,7 @@
   --sidebar-accent-foreground: oklch(.985 0 0);
   --sidebar-border: oklch(.269 0 0);
   --sidebar-ring: oklch(.439 0 0);
+  --input-background: oklch(.269 0 0);
 }
 
 html {
@@ -2979,35 +2985,85 @@ html {
   inset: 0;
   z-index: 320;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  overflow-y: auto;
-  padding: 18px 16px 24px;
-  background: transparent;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
 }
 
 .disc-auth-card {
   position: relative;
   z-index: 1;
-  width: min(680px, calc(100% - 20px));
+  width: min(420px, calc(100% - 32px));
   margin: 0 auto;
-  border: 1px solid #d9e2f4;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.18);
-  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 20px;
   display: grid;
-  gap: 14px;
+  gap: 12px;
   backdrop-filter: blur(8px);
+  color: var(--card-foreground);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+@media (max-width: 640px) {
+  .disc-auth-shell {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .disc-auth-card {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+    padding: 24px 20px 80px;
+    border: none;
+  }
+
+  .disc-auth-close {
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: var(--muted);
+  }
+}
+
+.disc-auth-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: opacity 0.2s;
+}
+
+.disc-auth-close:hover {
+  opacity: 0.8;
 }
 
 .disc-auth-hero-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
   color: #fff;
   background: linear-gradient(135deg, #2f6fed 0%, #2454be 100%);
-  box-shadow: 0 12px 24px rgba(47, 111, 237, 0.28);
+  box-shadow: 0 10px 20px rgba(47, 111, 237, 0.2);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3017,7 +3073,7 @@ html {
 .disc-auth-brand {
   margin: 0;
   text-align: center;
-  font-size: clamp(34px, 4.2vw, 54px);
+  font-size: clamp(28px, 3.5vw, 42px);
   line-height: 1.05;
   letter-spacing: -0.02em;
 }
@@ -3025,7 +3081,7 @@ html {
 .disc-auth-title {
   margin: 0;
   text-align: center;
-  font-size: clamp(24px, 3.2vw, 38px);
+  font-size: clamp(20px, 2.8vw, 30px);
   line-height: 1.15;
 }
 
@@ -3033,20 +3089,20 @@ html {
   margin: 0;
   text-align: center;
   color: #64748b;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .disc-auth-mode-note {
   margin: -4px 0 0;
   text-align: center;
   color: #475569;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .disc-auth-toggle {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .disc-auth-toggle button {
@@ -3054,9 +3110,10 @@ html {
   background: #f8faff;
   color: #34415d;
   border-radius: 10px;
-  min-height: 42px;
+  min-height: 38px;
   padding: 0 12px;
   cursor: pointer;
+  font-size: 13px;
 }
 
 .disc-auth-toggle button.active {
@@ -3067,22 +3124,23 @@ html {
 
 .disc-auth-form {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .disc-auth-form label {
   display: grid;
-  gap: 6px;
-  font-size: 13px;
+  gap: 4px;
+  font-size: 12px;
   color: #1f2937;
 }
 
 .disc-auth-form input {
   border: 1px solid #d7deee;
   border-radius: 10px;
-  min-height: 44px;
-  padding: 10px 12px;
+  min-height: 40px;
+  padding: 8px 12px;
   background: #fff;
+  font-size: 14px;
 }
 
 .disc-auth-form > button {
@@ -3090,10 +3148,11 @@ html {
   background: linear-gradient(135deg, #2563eb 0%, #2454be 100%);
   color: #fff;
   border-radius: 10px;
-  min-height: 44px;
+  min-height: 40px;
   padding: 0 14px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 14px;
 }
 
 .disc-auth-form > button:disabled {
@@ -3300,42 +3359,36 @@ html {
 }
 
 .dark .disc-auth-card {
-  background: rgba(15, 23, 42, 0.95);
-  border-color: #334155;
-  box-shadow: 0 24px 46px rgba(2, 6, 23, 0.6);
+  box-shadow: 0 24px 46px rgba(0, 0, 0, 0.4);
 }
 
 .dark .disc-auth-subtitle,
 .dark .disc-auth-mode-note,
 .dark .disc-auth-links,
 .dark .disc-auth-later {
-  color: #afbdd3;
+  color: var(--muted-foreground);
 }
 
 .dark .disc-auth-form label,
 .dark .disc-auth-check {
-  color: #d7e2f3;
+  color: var(--foreground);
 }
 
 .dark .disc-auth-form input {
-  background: #0f172a;
-  border-color: #334155;
-  color: #e2e8f0;
+  background: var(--input-background);
+  border-color: var(--border);
+  color: var(--foreground);
 }
 
 .dark .disc-auth-toggle button,
 .dark .disc-auth-secondary-btn {
-  background: #142136;
-  border-color: #334155;
-  color: #d6e3f8;
-}
-
-.dark .disc-auth-divider::before {
-  background: #334155;
+  background: var(--secondary);
+  border-color: var(--border);
+  color: var(--secondary-foreground);
 }
 
 .dark .disc-auth-divider span {
-  background: #111827;
+  background: var(--card);
 }
 
 .dark .disc-auth-password button {
@@ -3346,6 +3399,44 @@ html {
   background: #1a2a45;
   border-color: #35537f;
   color: #cde0ff;
+}
+
+.dark .disc-auth-form input {
+  background: var(--accent);
+  border-color: var(--border);
+  color: white;
+}
+
+.dark .disc-auth-form input::placeholder {
+  color: #94a3b8;
+}
+
+.dark .disc-auth-status {
+  color: white;
+}
+
+.dark .disc-auth-error {
+  color: #ff8080;
+}
+
+.dark .disc-auth-hero-icon {
+  background: white;
+  color: black;
+}
+
+.dark .disc-auth-form > button {
+  background: white;
+  color: black;
+}
+
+.dark .disc-auth-links button {
+  color: white;
+}
+
+.dark .disc-auth-toggle button.active {
+  background: white;
+  border-color: white;
+  color: black;
 }
 
 .dark .disc-auth-hint {

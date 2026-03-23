@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { cn } from "@/components/ui/utils";
+import { cn } from "./utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
@@ -114,4 +114,3 @@ export {
   TableCell,
   TableCaption,
 };
-

@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
-import { cn } from "@/components/ui/utils";
+import { cn } from "./utils";
 
 function Avatar({
   className,
@@ -51,4 +51,3 @@ function AvatarFallback({
 }
 
 export { Avatar, AvatarImage, AvatarFallback };
-
