@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen bg-background text-foreground`}>
+      <body className={`${inter.className} h-screen bg-background text-foreground`}>
         <Providers>
           <LayoutShell>{children}</LayoutShell>
         </Providers>

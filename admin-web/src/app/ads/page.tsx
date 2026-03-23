@@ -16,7 +16,8 @@ import {
   Link as LinkIcon,
   Plus,
   Upload,
-  AlertCircle
+  AlertCircle,
+  Search
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 

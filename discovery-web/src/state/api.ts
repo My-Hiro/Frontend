@@ -1430,22 +1430,4 @@ export const discoveryApi = {
       method: 'DELETE'
     });
   }
-  };
-
-  async addBookmark(type: 'store' | 'item' | 'search', targetId: string, metadata?: any): Promise<void> {
-    await jsonFetch('/bookmarks', {
-      method: 'POST',
-      body: JSON.stringify({ type, target_id: targetId, metadata })
-    });
-  },
-
-  async getBookmarks(type?: 'store' | 'item' | 'search'): Promise<any[]> {
-    return jsonFetch(`/bookmarks${type ? `?type=${type}` : ''}`);
-  },
-
-  async removeBookmark(type: string, targetId: string): Promise<void> {
-    await jsonFetch(`/bookmarks/${type}/${targetId}`, {
-      method: 'DELETE'
-    });
-  }
 };
