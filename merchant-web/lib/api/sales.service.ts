@@ -52,7 +52,7 @@ export const salesService = {
 
   async downloadReceiptPdf(storeId: string, saleId: string): Promise<Blob> {
     const response = await fetch(
-      `${process.env.VITE_API_BASE ?? "http://localhost:4000/api"}/merchant/sales/${encodeURIComponent(saleId)}/receipt.pdf?store_id=${encodeURIComponent(storeId)}`
+      `${process.env.VITE_API_BASE ?? "https://backend-production-0494.up.railway.app/api"}/merchant/sales/${encodeURIComponent(saleId)}/receipt.pdf?store_id=${encodeURIComponent(storeId)}`
     );
     if (!response.ok) {
       throw new Error(`Receipt download failed: ${response.status}`);

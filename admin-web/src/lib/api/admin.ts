@@ -359,7 +359,7 @@ export const adminApi = {
     const form = new FormData();
     form.append("file", file);
     form.append("preset", options?.preset ?? "ad_banner");
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4000/api"}/media/upload`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE ?? "https://backend-production-0494.up.railway.app/api"}/media/upload`, {
       method: "POST",
       body: form
     });

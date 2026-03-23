@@ -19,7 +19,7 @@ import type {
   Store as FallbackStore
 } from "../components/data";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4000/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "https://backend-production-0494.up.railway.app/api";
 const AUTH_STORAGE_KEY = "myhiro_auth_discovery";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^\+?[1-9]\d{7,14}$/;

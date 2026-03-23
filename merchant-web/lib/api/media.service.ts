@@ -7,7 +7,7 @@ export type MediaUploadPreset =
   | "ad_banner"
   | "verification_document";
 
-const API_BASE = process.env.VITE_API_BASE ?? "http://localhost:4000/api";
+const API_BASE = process.env.VITE_API_BASE ?? "https://backend-production-0494.up.railway.app/api";
 
 export const mediaService = {
   async uploadMedia(file: File, preset: MediaUploadPreset = "product_image"): Promise<string> {
