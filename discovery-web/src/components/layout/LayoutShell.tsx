@@ -84,7 +84,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           onBack={pathname !== "/" ? () => router.back() : undefined}
         />
 
-        <main className="flex-1 max-w-7xl mx-auto w-full px-4 lg:px-6 py-6 pb-32 lg:pb-12">
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 lg:px-6 py-6 pb-32 lg:pb-12 ">
           {children}
         </main>
 
